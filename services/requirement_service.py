@@ -35,8 +35,11 @@ class RequirementService:
         bullets = []
         for line in lines:
             cleaned = re.sub(r"^[-*\d\.\)]+\s*", "", line)
-            if cleaned:
-                bullets.append(cleaned)
+            if not cleaned:
+                continue
+
+            fragments = [fragment.strip() for fragment in re.split(r"(?<=[.!?])\s+|;\s+", cleaned) if fragment.strip()]
+            bullets.extend(fragments or [cleaned])
 
         requirements = []
         for index, bullet in enumerate(bullets, start=1):

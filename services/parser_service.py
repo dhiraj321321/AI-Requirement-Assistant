@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import io
 import re
 import zipfile
@@ -30,9 +31,13 @@ class ParserService:
         except Exception:
             return ""
 
-        paragraphs = re.findall(r"<w:t[^>]*>(.*?)</w:t>", xml_data)
-        text = " ".join(paragraphs)
-        return re.sub(r"\s+", " ", text).strip()
+        paragraphs = [html.unescape(match.strip()) for match in re.findall(r"<w:t[^>]*>(.*?)</w:t>", xml_data) if match.strip()]
+        if not paragraphs:
+            return ""
+
+        text = "\n".join(paragraphs)
+        text = re.sub(r"[ \t]+", " ", text)
+        return re.sub(r"\n{3,}", "\n\n", text).strip()
 
     def _parse_pdf(self, content: bytes) -> str:
         try:
